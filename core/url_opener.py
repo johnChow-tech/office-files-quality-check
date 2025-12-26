@@ -19,50 +19,50 @@ class UrlOpener:
         self.temp_html_path = None  # 一時HTMLディレクトリを保存し、外部からのクリーンアップに利用
 
     def _get_urls_from_dat(self, file_path):
-        """
-        単一の .csv ファイル（CSV形式）を読み込み、「URL」列のデータと元ファイル名を抽出します。
-        抽出された URL に対して重複排除処理を行います（ファイル内での重複排除ですが、グローバル重複排除のために全ての URL を返します）。
-        """
-        urls_tuples = []
-        source_file_name = os.path.basename(file_path)
-
-        try:
-            with open(file_path, 'r', encoding='utf-8', newline='') as datafile:
-                reader = csv.DictReader(datafile)
-                if not reader.fieldnames or "URL" not in reader.fieldnames:
-                    print(
-                        f"警告: ファイル {source_file_name} には 'URL' 列がありません。スキップします。")
-                    return source_file_name, []
-
-                first_row = True
-                for row in reader:
-                    # 元ファイル名を取得 (存在する場合)
-                    if first_row and "Source File" in row and row["Source File"]:
-                        source_file_name = row["Source File"]
-                        first_row = False
-
-                    url = row.get("URL", "").strip()
-                    link_text = row.get("Link Text", "").strip()
-
-                    if url and (url.startswith('http') or url.startswith('https')):
-                        urls_tuples.append(url)  # URL のみが必要
-
-        except Exception as e:
-            messagebox.showerror(
-                "ファイル読み取りエラー", f"ファイル {os.path.basename(file_path)} を読み取るか解析できません: {e}")
-            return os.path.basename(file_path), []
-
-        # ファイル内での重複排除後の URL リストのみを返します
-        # ファイル内での重複排除は、後続のグローバル処理の負担を減らすために残しますが、主にグローバル重複排除に依存します。
-        # 簡略化: グローバル処理のために直接セットを返し、同時に内部重複排除のログを記録
-        unique_urls_in_file = sorted(list(set(urls_tuples)))
-
-        # ファイル内での重複排除情報を出力 (オプション)
-        if len(urls_tuples) != len(unique_urls_in_file):
-            print(
-                f"   [ファイル内重複排除] {os.path.basename(file_path)}: {len(urls_tuples) - len(unique_urls_in_file)} 個の重複リンクが発見され、削除されました。")
-
-        return source_file_name, unique_urls_in_file
+            urls_tuples = []
+            source_file_name = os.path.basename(file_path)
+    
+            try:
+                # 使用 utf-8-sig 兼容带 BOM 的文件
+                with open(file_path, 'r', encoding='utf-8-sig', newline='') as datafile:
+                    reader = csv.DictReader(datafile)
+                    
+                    # 兼容性处理：防止标题行存在空格或大小写不一致
+                    headers = [h.strip() if h else "" for h in reader.fieldnames] if reader.fieldnames else []
+                    url_col = next((h for h in headers if h.upper() == "URL"), None)
+                    src_col = next((h for h in headers if h.upper() == "SOURCE FILE"), None)
+    
+                    if not url_col:
+                        print(f"警告: 文件 {source_file_name} 缺失 'URL' 列。")
+                        return source_file_name, []
+    
+                    for row in reader:
+                        # 获取 URL 并去除空白字符
+                        raw_url = row.get(url_col, "").strip()
+                        
+                        # 修正过滤逻辑：只要包含 '.' 且不是纯数字，或者以协议开头，即视为有效 URL
+                        if raw_url:
+                            # 自动补全缺失协议的链接
+                            if not raw_url.lower().startswith(('http://', 'https://', 'mailto:', 'file:')):
+                                if '.' in raw_url:
+                                    full_url = "https://" + raw_url
+                                else:
+                                    continue # 可能是内部锚点，跳过
+                            else:
+                                full_url = raw_url
+                            
+                            urls_tuples.append(full_url)
+    
+                        # 更新源文件名（仅取第一行）
+                        if src_col and row.get(src_col):
+                            source_file_name = row.get(src_col)
+    
+            except Exception as e:
+                print(f"读取错误: {file_path} -> {e}")
+                return os.path.basename(file_path), []
+    
+            unique_urls_in_file = sorted(list(set(urls_tuples)))
+            return source_file_name, unique_urls_in_file
 
     def _create_and_open_qc_prompt(self, base_output_path, source_file_name, url_count):
         """
