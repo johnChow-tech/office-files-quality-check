@@ -1,6 +1,6 @@
-[![English](https://img.shields.io/badge/lang-English-blue.svg)](#english)
-[![Chinese](https://img.shields.io/badge/lang-简体中文-red.svg)](#chinese)
-[![Japanese](https://img.shields.io/badge/lang-日本語-green.svg)](#japanese)
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.en.md)
+[![Chinese](https://img.shields.io/badge/lang-简体中文-red.svg)](README.zh-CN.md)
+[![Japanese](https://img.shields.io/badge/lang-日本語-green.svg)](README.md)
 
 ----
 

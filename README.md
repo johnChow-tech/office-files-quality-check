@@ -1,64 +1,66 @@
-[![English](https://img.shields.io/badge/lang-English-blue.svg)](#english)
-[![Chinese](https://img.shields.io/badge/lang-简体中文-red.svg)](#chinese)
-[![Japanese](https://img.shields.io/badge/lang-日本語-green.svg)](#japanese)
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.en.md)
+[![Chinese](https://img.shields.io/badge/lang-简体中文-red.svg)](README.zh-CN.md)
+[![Japanese](https://img.shields.io/badge/lang-日本語-green.svg)](README.md)
 
 ----
 
-# Project Analysis: Office Files Quality Check Tool
+# プロジェクト分析：Officeファイル品質チェックツール
 
-## Project Overview
+## プロジェクト概要
 
-This project is a Python-based GUI application designed to extract content from Office documents (specifically `.docx`, `.xlsx`, `.xlsm`, and `.pptx` files). It leverages Tkinter for the user interface and dedicated Python libraries for document parsing.
+このプロジェクトは、Officeドキュメント（具体的には `.docx`、`.xlsx`、`.xlsm`、`.pptx` ファイル）からコンテンツを抽出するために設計された、PythonベースのGUIアプリケーションです。ユーザーインターフェースにはTkinterを、ドキュメントの解析には専用のPythonライブラリを使用しています。
 
-**Core functionalities include:**
+**主な機能：**
 
-*   **Text Extraction:** Extracts plain text content from Office documents and saves it into Markdown (`.md`) files. These are organized into timestamped `PlainText_YYYYMMDDHHMMSS` directories within the user-specified output path.
-*   **Hyperlink Extraction:** Extracts hyperlinks from Office documents and saves them into `.csv` files (structured as CSV with specific headers and extensions). These are organized into timestamped `HyperLinks_YYYYMMDDHHMMSS` directories.
-*   **Batch URL Opening:** Provides a feature to open all extracted hyperlinks from the `.csv` files. This functionality includes robust global deduplication, ensuring each unique URL is opened only once across all processed documents. Before opening, it generates an informational HTML page summarizing the process and opens it in the default web browser.
+* **テキスト抽出：** Officeドキュメントからプレーンテキストを抽出し、Markdown（`.md`）ファイルとして保存します。これらは、ユーザーが指定した出力パス内のタイムスタンプ付きディレクトリ（例：`PlainText_YYYYMMDDHHMMSS`）に整理されます。
+* **ハイパーリンク抽出：** Officeドキュメントからハイパーリンクを抽出し、特定のヘッダーと拡張子を持つ `.csv` ファイルとして保存します。これらは、タイムスタンプ付きの `HyperLinks_YYYYMMDDHHMMSS` ディレクトリに整理されます。
+* **URLの一括展開：** 抽出された `.csv` ファイルからすべてのハイパーリンクを開く機能を提供します。この機能には強力なグローバル重複排除ロジックが含まれており、処理されたすべてのドキュメント全体で、各ユニークURLが一度だけ開かれるように制御されます。URLを開く前に、プロセスの概要をまとめた情報HTMLページが生成され、既定のブラウザで表示されます。
 
-**Key Technologies:**
+**主要技術：**
 
-*   **Language:** Python
-*   **GUI Framework:** Tkinter
-*   **Document Parsing Libraries:** `python-docx`, `openpyxl`, `python-pptx`
-*   **Other Libraries:** `csv`, `os`, `sys`, `threading`, `webbrowser`, `datetime`
+* **言語：** Python
+* **GUIフレームワーク：** Tkinter
+* **ドキュメント解析ライブラリ：** `python-docx`, `openpyxl`, `python-pptx`
+* **その他のライブラリ：** `csv`, `os`, `sys`, `threading`, `webbrowser`, `datetime`
 
-**Architecture:**
+**アーキテクチャ：**
 
-*   **GUI Layer:** `gui.py` - Handles user interactions, window management, event binding, and progress display.
-*   **Core Logic Layer:** `core/` directory containing:
-    *   `extractor.py`: Implements the logic for parsing Office files, extracting text, and hyperlinks.
-    *   `url_opener.py`: Manages reading `.csv` files, performing URL deduplication, and opening URLs in the browser.
+* **GUIレイヤー：** `gui.py` - ユーザーインタラクション、ウィンドウ管理、イベントバインディング、および進捗表示を担当します。
+* **コアロジックレイヤー：** `core/` ディレクトリに以下が含まれます：
+* `extractor.py`: Officeファイルの解析、テキストおよびハイパーリンクの抽出ロジックを実装しています。
+* `url_opener.py`: `.csv` ファイルの読み込み、URLの重複排除、およびブラウザでのURL展開を管理します。
 
-## Building and Running
+## ビルドと実行方法
 
-**1. Install Dependencies:**
+**1. 依存関係のインストール：**
 
-To set up the project environment and install all necessary Python packages, run the following command in your terminal:
+プロジェクト環境をセットアップし、必要なすべてのPythonパッケージをインストールするには、ターミナルで以下のコマンドを実行してください。
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**2. Run the Application:**
+**2. アプリケーションの実行：**
 
-To launch the GUI application, execute the main script:
+GUIアプリケーションを起動するには、メインスクリプトを実行します。
 
 ```bash
 python gui.py
 ```
 
-This will open the graphical user interface, allowing you to select input and output directories and initiate the extraction process.
+これによりグラフィカルユーザーインターフェースが開き、入力・出力ディレクトリの選択および抽出プロセスの開始が可能になります。
 
-## Development Conventions
+## 開発規約
 
-*   **Code Organization:** The project is structured with a clear separation of concerns, placing core business logic in the `core/` directory and the user interface in `gui.py`.
-*   **Comments and Documentation:** Code includes extensive comments, primarily in Japanese, explaining the purpose of functions, classes, and specific logic blocks. Docstrings are used for methods.
-*   **Error Handling:** Robust error handling is implemented using `try-except` blocks for file operations, library imports, and data processing. User-facing errors are communicated through Tkinter's `messagebox` and redirected to the console/log window (`sys.stderr`).
-*   **User Feedback:** The GUI provides visual feedback through a progress bar (`ttk.Progressbar`) and a dedicated log area that captures `stdout` and `stderr` output.
-*   **Asynchronous Operations:** For long-running extraction tasks, a `threading.Thread` is used to prevent the GUI from freezing, ensuring a responsive user experience.
-*   **File Naming Conventions:** Extracted files follow a consistent naming scheme:
-    *   **Text:** `PlainText_[OriginalFileName]_[OriginalExtension].md` (e.g., `PlainText_Report_docx.md`)
-    *   **Hyperlinks:** `Urls_[OriginalFileName]_[OriginalExtension].csv` (e.g., `Urls_Report_docx.csv`)
-    *   Output directories are timestamped (e.g., `PlainText_20251227103000`).
-*   **URL Deduplication:** The `url_opener.py` module implements both within-file and global deduplication of URLs to avoid redundant operations.
+* **コード構成：** 関心事の分離（Separation of Concerns）を明確にし、コアビジネスロジックを `core/` ディレクトリに、ユーザーインターフェースを `gui.py` に配置しています。
+* **コメントとドキュメント：** コード内には、関数、クラス、および特定のロジックブロックの目的を説明する詳細なコメント（主に日本語）が含まれています。メソッドにはドキュメント文字列（Docstrings）が使用されています。
+* **エラーハンドリング：** ファイル操作、ライブラリのインポート、データ処理において、`try-except` ブロックを用いた堅牢なエラーハンドリングが実装されています。ユーザー向けのエラーはTkinterの `messagebox` を通じて通知され、詳細はコンソール/ログウィンドウ（`sys.stderr`）に出力されます。
+* **ユーザーフィードバック：** プログレスバー（`ttk.Progressbar`）による視覚的なフィードバックと、`stdout` および `stderr` の出力をキャプチャする専用のログエリアがGUIに備わっています。
+* **非同期処理：** 時間のかかる抽出タスクには `threading.Thread` を使用し、GUIのフリーズを防ぎ、レスポンシブなユーザー体験を確保しています。
+* **ファイル命名規則：** 抽出されたファイルは一貫した命名規則に従います。
+* **テキスト：** `PlainText_[元のファイル名]_[元の拡張子].md`（例：`PlainText_Report_docx.md`）
+* **ハイパーリンク：** `Urls_[元のファイル名]_[元の拡張子].csv`（例：`Urls_Report_docx.csv`）
+* 出力ディレクトリにはタイムスタンプが付与されます（例：`PlainText_20251227103000`）。
+
+
+* **URL重複排除：** `url_opener.py` モジュールは、冗長な操作を避けるため、ファイル内およびグローバルでのURL重複排除を実装しています。
