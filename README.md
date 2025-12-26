@@ -1,3 +1,9 @@
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](#english)
+[![Chinese](https://img.shields.io/badge/lang-简体中文-red.svg)](#chinese)
+[![Japanese](https://img.shields.io/badge/lang-日本語-green.svg)](#japanese)
+
+----
+
 # Project Analysis: Office Files Quality Check Tool
 
 ## Project Overview
