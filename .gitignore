@@ -1,0 +1,21 @@
+# Python files
+__pycache__/
+*.pyc
+
+# Virtual Environments
+venv/
+.venv/
+
+# OS files
+.DS_Store
+
+# Project Specific Output (OUTPUT_DIR_NAME = "DocInsight_Output")
+DocInsight_Output/
+.vscode/settings.json
+tkinter_sample.py
+
+# test data
+output/
+PlainText/
+HyperLinks/
+temp_html/
