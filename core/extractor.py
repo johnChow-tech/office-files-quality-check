@@ -170,8 +170,8 @@ class DocExtractor:
 
                 except KeyError as ke:
                     print(f"  [DOCX警告] 無効な、または内部的なハイパーリンクを検出しました: {ke}")
-                except AttributeError:
-                    pass
+                except AttributeError as ae:
+                    print(f"  [DOCX警告] 属性エラー: ハイパーリンクの属性にアクセスできませんでした: {ae}")
                 except Exception as e:
                     print(f"  [DOCX警告] ハイパーリンクの抽出中に不明なエラーが発生しました: {e}")
 
@@ -216,8 +216,8 @@ class DocExtractor:
 
                             if url and link_text:
                                 urls_list.append((link_text, url))
-                    except AttributeError:
-                        pass
+                    except AttributeError as ae:
+                        print(f"  [XLSX警告] 属性エラー: ハイパーリンクの属性にアクセスできませんでした: {ae}")
                     except Exception as e:
                         print(f"  [XLSX警告] ハイパーリンクの抽出中に不明なエラーが発生しました: {e}")
 
@@ -260,8 +260,8 @@ class DocExtractor:
 
                                 if url and link_text:
                                     urls_list.append((link_text, url))
-                        except AttributeError:
-                            pass
+                        except AttributeError as ae:
+                            print(f"  [PPTX警告] 属性エラー: ハイパーリンクの属性にアクセスできませんでした: {ae}")
                         except Exception as e:
                             print(f"  [PPTX警告] ハイパーリンクの抽出中に不明なエラーが発生しました: {e}")
 
