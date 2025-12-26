@@ -5,6 +5,7 @@ import os
 import csv
 import sys
 from datetime import datetime
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
 
 # 異なるファイルタイプを処理するためのライブラリをインポート (インストールを確認: python-docx openpyxl python-pptx)
 try:
@@ -24,7 +25,7 @@ class DocExtractor:
     # サポートされているファイルタイプを定義 (新たに .xlsm を追加)
     TARGET_EXTENSIONS = ('.docx', '.xlsx', '.xlsm', '.pptx')
     TEXT_EXTENSIONS = ('.md')
-    URLS_EXTENSIONS = ('.dat')
+    URLS_EXTENSIONS = ('.csv')
 
     # 出力サブフォルダ名を定義
     formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -145,133 +146,94 @@ class DocExtractor:
     # --------------------------------------------------------------------------
 
     def _extract_from_docx(self, file_abs_path):
-        # DOCX ファイルからプレーンテキストとハイパーリンクを抽出します。
+        """修正版：通过 XML 元素及关系映射提取 DOCX 超链接"""
         try:
             document = Document(file_abs_path)
         except Exception as e:
-            raise IOError(f"DOCX ファイルを開くまたは読み取ることができません: {e}")
-
+            raise IOError(f"DOCX 打开失败: {e}")
+    
         full_text = []
         urls_list = []
-
-        # 段落を走査
-        for paragraph in document.paragraphs:
-            full_text.append(paragraph.text)
-
-            # ハイパーリンクを抽出 (安全チェック済み)
-            for run in paragraph.runs:
-                try:
-                    if hasattr(run, 'hyperlink') and run.hyperlink and run.hyperlink.address:
-                        url = run.hyperlink.address
-                        link_text = run.text.strip()
-
-                        if url and link_text:
-                            urls_list.append((link_text, url))
-
-                except KeyError as ke:
-                    print(f"  [DOCX警告] 無効な、または内部的なハイパーリンクを検出しました: {ke}")
-                except AttributeError as ae:
-                    print(f"  [DOCX警告] 属性エラー: ハイパーリンクの属性にアクセスできませんでした: {ae}")
-                except Exception as e:
-                    print(f"  [DOCX警告] ハイパーリンクの抽出中に不明なエラーが発生しました: {e}")
-
-        # 表を走査
+        
+        # 获取段落及表格中的所有段落
+        all_paragraphs = list(document.paragraphs)
         for table in document.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    for paragraph in cell.paragraphs:
-                        full_text.append(paragraph.text)
-
-        text_content = '\n'.join(full_text)
-        unique_urls = list(set(urls_list))
-
-        return text_content, unique_urls
-
+                    all_paragraphs.extend(cell.paragraphs)
+    
+        for para in all_paragraphs:
+            full_text.append(para.text)
+            
+            # 深入 XML 查找超链接元素 (w:hyperlink)
+            # 获取段落底层 XML：para._p
+            hyperlink_elements = para._p.xpath('.//w:hyperlink')
+            for hl in hyperlink_elements:
+                rId = hl.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id')
+                if rId in para.part.rels:
+                    url = para.part.rels[rId].target_ref
+                    # 提取链接显示的文本内容
+                    link_text = "".join([t.text for t in hl.xpath('.//w:t')])
+                    if url:
+                        urls_list.append((link_text.strip() or "LINK", url))
+    
+        return '\n'.join(full_text), list(set(urls_list))
+    
     def _extract_from_xlsx(self, file_abs_path):
-        # XLSX/XLSM ファイルからプレーンテキストとハイパーリンクを抽出します。
+        """修正版：禁用 read_only 模式以激活超链接解析"""
         try:
-            workbook = load_workbook(
-                file_abs_path, read_only=True, data_only=True)
+            # 必须设置 read_only=False 才能读取 cell.hyperlink
+            workbook = load_workbook(file_abs_path, read_only=False, data_only=True)
         except Exception as e:
-            raise IOError(f"XLSX ファイルを開くまたは読み取ることができません: {e}")
-
+            raise IOError(f"XLSX 打开失败: {e}")
+    
         full_text = []
         urls_list = []
-
+    
         for sheet in workbook.worksheets:
             full_text.append(f"\n--- Sheet: {sheet.title} ---\n")
-
             for row in sheet.iter_rows():
                 row_content = []
                 for cell in row:
-                    cell_value = str(
-                        cell.value) if cell.value is not None else ""
-                    row_content.append(cell_value)
-
-                    # ハイパーリンクを抽出 (安全チェック済み)
-                    try:
-                        if hasattr(cell, 'hyperlink') and cell.hyperlink and cell.hyperlink.target:
-                            url = cell.hyperlink.target
-                            link_text = cell_value
-
-                            if url and link_text:
-                                urls_list.append((link_text, url))
-                    except AttributeError as ae:
-                        print(f"  [XLSX警告] 属性エラー: ハイパーリンクの属性にアクセスできませんでした: {ae}")
-                    except Exception as e:
-                        print(f"  [XLSX警告] ハイパーリンクの抽出中に不明なエラーが発生しました: {e}")
-
+                    val = str(cell.value) if cell.value is not None else ""
+                    row_content.append(val)
+                    
+                    # 直接访问单元格 hyperlink 对象
+                    if cell.hyperlink and cell.hyperlink.target:
+                        urls_list.append((val or "[Cell Link]", cell.hyperlink.target))
+                
                 if any(row_content):
                     full_text.append('\t'.join(row_content))
-
-        text_content = '\n'.join(full_text)
-        unique_urls = list(set(urls_list))
-
-        return text_content, unique_urls
-
+    
+        return '\n'.join(full_text), list(set(urls_list))
+    
     def _extract_from_pptx(self, file_abs_path):
-        # PPTX ファイルからプレーンテキストとハイパーリンクを抽出します。
+        """修正版：访问 run.hyperlink.address 属性"""
         try:
             presentation = Presentation(file_abs_path)
         except Exception as e:
-            raise IOError(f"PPTX ファイルを開くまたは読み取ることができません: {e}")
-
+            raise IOError(f"PPTX 打开失败: {e}")
+    
         full_text = []
         urls_list = []
-
-        for slide_index, slide in enumerate(presentation.slides):
-            full_text.append(f"\n--- Slide {slide_index + 1} ---\n")
-
+    
+        for slide in presentation.slides:
             for shape in slide.shapes:
+                # 1. 处理形状本身的超链接 (如点击图片跳转)
+                if hasattr(shape, "click_action") and shape.click_action.hyperlink.address:
+                    urls_list.append(("[Shape]", shape.click_action.hyperlink.address))
+    
+                # 2. 处理文本框内的超链接
                 if not shape.has_text_frame:
                     continue
-
                 for paragraph in shape.text_frame.paragraphs:
-                    para_text = ""
-
                     for run in paragraph.runs:
-                        para_text += run.text
-
-                        # ハイパーリンクを抽出 (docx と同様、安全チェック済み)
-                        try:
-                            if hasattr(run, 'hyperlink') and run.hyperlink and run.hyperlink.address:
-                                url = run.hyperlink.address
-                                link_text = run.text.strip()
-
-                                if url and link_text:
-                                    urls_list.append((link_text, url))
-                        except AttributeError as ae:
-                            print(f"  [PPTX警告] 属性エラー: ハイパーリンクの属性にアクセスできませんでした: {ae}")
-                        except Exception as e:
-                            print(f"  [PPTX警告] ハイパーリンクの抽出中に不明なエラーが発生しました: {e}")
-
-                    if para_text.strip():
-                        full_text.append(para_text)
-
-        text_content = '\n'.join(full_text)
-        unique_urls = list(set(urls_list))
-
-        return text_content, unique_urls
+                        full_text.append(run.text)
+                        # 访问 hyperlink 对象的 address 属性
+                        if run.hyperlink and run.hyperlink.address:
+                            urls_list.append((run.text.strip() or "LINK", run.hyperlink.address))
+    
+        return '\n'.join(full_text), list(set(urls_list))
 
     # --------------------------------------------------------------------------
     #             ファイル保存ヘルパーメソッド (命名を修正)
@@ -309,7 +271,7 @@ class DocExtractor:
         # original_ext_clean = ext.strip('.')  # 'docx'
 
         # 2. 新しいファイル名を構築: Urls_報告書_docx.csv
-        output_file_name = f"Urls_{base_name}_{original_ext_clean}.dat"
+        output_file_name = f"Urls_{base_name}_{original_ext_clean}.csv"
         output_file = os.path.join(output_dir, output_file_name)
 
         try:

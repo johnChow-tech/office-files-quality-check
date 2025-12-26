@@ -11,7 +11,7 @@ import time
 
 class UrlOpener:
     """
-    Urls_*.dat ファイル（CSV形式）を読み込み、含まれるハイパーリンクを一括で開く役割を担います。
+    Urls_*.csv ファイル（CSV形式）を読み込み、含まれるハイパーリンクを一括で開く役割を担います。
     """
 
     def __init__(self):
@@ -20,7 +20,7 @@ class UrlOpener:
 
     def _get_urls_from_dat(self, file_path):
         """
-        単一の .dat ファイル（CSV形式）を読み込み、「URL」列のデータと元ファイル名を抽出します。
+        単一の .csv ファイル（CSV形式）を読み込み、「URL」列のデータと元ファイル名を抽出します。
         抽出された URL に対して重複排除処理を行います（ファイル内での重複排除ですが、グローバル重複排除のために全ての URL を返します）。
         """
         urls_tuples = []

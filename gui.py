@@ -91,7 +91,11 @@ class MainGUI:
         master.geometry('1440x860')
 
         # コアビジネスオブジェクト
-        self.extractor = DocExtractor()
+        try:
+            self.extractor = DocExtractor()
+        except RuntimeError as e:
+            messagebox.showerror("初期化エラー", f"アプリケーションの初期化に失敗しました: {e}\n\n必要なライブラリがインストールされているか確認してください。")
+            sys.exit(1)  # Exit application if DocExtractor cannot be initialized
         self.opener = UrlOpener()
 
         # 環境変数
@@ -400,7 +404,7 @@ class MainGUI:
             folder_path=outputUrlsPath,
             target_listbox=self.outputUrlsListbox,
             path_map=self.urls_output_path_map,
-            extension_filter=('.dat',)
+            extension_filter=('.csv',)
         )
 
     def _harvest_btn_on_click(self):
@@ -448,7 +452,7 @@ class MainGUI:
 
         if not urlsPath or not os.path.isdir(urlsPath):
             messagebox.showwarning(
-                "警告", "まず【抽出する】をクリックしてハイパーリンクファイル (.dat) を生成してください！")
+                "警告", "まず【抽出する】をクリックしてハイパーリンクファイル (.csv) を生成してください！")
             return
 
         # リストを更新し、パス対応付けが最新であることを確認
@@ -456,12 +460,12 @@ class MainGUI:
             folder_path=urlsPath,
             target_listbox=self.outputUrlsListbox,
             path_map=self.urls_output_path_map,
-            extension_filter=('.dat',)
+            extension_filter=('.csv',)
         )
 
         if not self.urls_output_path_map:
             messagebox.showinfo(
-                "ファイル警告", "【HyperLinks】ディレクトリに Urls_*.dat ファイルが見つかりませんでした。")
+                "ファイル警告", "【HyperLinks】ディレクトリに Urls_*.csv ファイルが見つかりませんでした。")
             return
 
         selected_indices = self.outputUrlsListbox.curselection()

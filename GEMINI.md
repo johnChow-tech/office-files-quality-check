@@ -7,8 +7,8 @@ This project is a Python-based GUI application designed to extract content from 
 **Core functionalities include:**
 
 *   **Text Extraction:** Extracts plain text content from Office documents and saves it into Markdown (`.md`) files. These are organized into timestamped `PlainText_YYYYMMDDHHMMSS` directories within the user-specified output path.
-*   **Hyperlink Extraction:** Extracts hyperlinks from Office documents and saves them into `.dat` files (structured as CSV with specific headers and extensions). These are organized into timestamped `HyperLinks_YYYYMMDDHHMMSS` directories.
-*   **Batch URL Opening:** Provides a feature to open all extracted hyperlinks from the `.dat` files. This functionality includes robust global deduplication, ensuring each unique URL is opened only once across all processed documents. Before opening, it generates an informational HTML page summarizing the process and opens it in the default web browser.
+*   **Hyperlink Extraction:** Extracts hyperlinks from Office documents and saves them into `.csv` files (structured as CSV with specific headers and extensions). These are organized into timestamped `HyperLinks_YYYYMMDDHHMMSS` directories.
+*   **Batch URL Opening:** Provides a feature to open all extracted hyperlinks from the `.csv` files. This functionality includes robust global deduplication, ensuring each unique URL is opened only once across all processed documents. Before opening, it generates an informational HTML page summarizing the process and opens it in the default web browser.
 
 **Key Technologies:**
 
@@ -22,7 +22,7 @@ This project is a Python-based GUI application designed to extract content from 
 *   **GUI Layer:** `gui.py` - Handles user interactions, window management, event binding, and progress display.
 *   **Core Logic Layer:** `core/` directory containing:
     *   `extractor.py`: Implements the logic for parsing Office files, extracting text, and hyperlinks.
-    *   `url_opener.py`: Manages reading `.dat` files, performing URL deduplication, and opening URLs in the browser.
+    *   `url_opener.py`: Manages reading `.csv` files, performing URL deduplication, and opening URLs in the browser.
 
 ## Building and Running
 
@@ -53,6 +53,6 @@ This will open the graphical user interface, allowing you to select input and ou
 *   **Asynchronous Operations:** For long-running extraction tasks, a `threading.Thread` is used to prevent the GUI from freezing, ensuring a responsive user experience.
 *   **File Naming Conventions:** Extracted files follow a consistent naming scheme:
     *   **Text:** `PlainText_[OriginalFileName]_[OriginalExtension].md` (e.g., `PlainText_Report_docx.md`)
-    *   **Hyperlinks:** `Urls_[OriginalFileName]_[OriginalExtension].dat` (e.g., `Urls_Report_docx.dat`)
+    *   **Hyperlinks:** `Urls_[OriginalFileName]_[OriginalExtension].csv` (e.g., `Urls_Report_docx.csv`)
     *   Output directories are timestamped (e.g., `PlainText_20251227103000`).
 *   **URL Deduplication:** The `url_opener.py` module implements both within-file and global deduplication of URLs to avoid redundant operations.
