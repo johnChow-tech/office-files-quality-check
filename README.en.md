@@ -8,20 +8,29 @@
 
 ## Usage Examples
 1. **Simple Operation Interface**
+
     <img src="./picture/gui.png" width="600">
+
     A straightforward design allowing you to select the target folder and output destination. The lightweight Tkinter-based UI ensures anyone can start operating it without confusion.
 
 2. **Real-time Text Extraction and Log Display**
+
     <img src="./picture/extract_and_log.png" width="600">
+
     During execution, the text extraction status from each file is displayed in real-time in the log window. You can instantly grasp whether processing has completed successfully and which files are currently being processed.
 
 3. **Batch Hyperlink Extraction and Duplication Check**
+
     <img src="./picture/url_check.png" width="600">
+
     Comprehensively extracts and lists URLs within documents. A unique deduplication logic helps organize common references from large numbers of files, facilitating smooth batch verification in a browser.
 
 4. **AI-powered Quality Check (LLM Integration)**
+
     [Prompt for AI analysis of extracted text available here](./prompt/QC-prompt.md)
+
     <img src="./picture/copilot_qc.png" width="600">
+    
     By inputting the extracted Markdown-formatted text into an LLM like Copilot, you can receive advanced proofreading assistance, including suggestions for typos, inconsistent expressions, and logical contradictions.
 
 ## Project Overview
