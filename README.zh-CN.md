@@ -6,6 +6,24 @@
 
 # 项目分析：Office 文件质量检查工具
 
+## 使用示例
+1. **简洁操作界面**
+    <img src="./picture/gui.png" width="600">
+    设计简洁，仅需选择目标文件夹和输出路径。基于 Tkinter 的轻量级 UI，确保任何用户都能轻松上手。
+
+2. **实时文本提取与日志显示**
+    <img src="./picture/extract_and_log.png" width="600">
+    执行过程中，每个文件的文本提取状态会在日志窗口实时显示。您可以即时了解处理是否成功完成以及哪些文件正在处理中。
+
+3. **批量超链接提取与去重**
+    <img src="./picture/url_check.png" width="600">
+    全面提取文档中的 URL 并列表化。独特的去重逻辑有助于从大量文件中整理出常见的引用，方便在浏览器中批量验证。
+
+4. **AI 辅助质量检查 (LLM 集成)**
+    [AI 分析提取文本的提示词可在此处获取](./prompt/QC-prompt.md)
+    <img src="./picture/copilot_qc.png" width="600">
+    通过将提取出的 Markdown 格式文本输入到如 Copilot 等大型语言模型 (LLM) 中，您可以获得高级校对支持，包括拼写错误、表达不一致和逻辑冲突的指出。
+
 ## 项目简介
 
 本项目是一款基于 Python 的 GUI 应用程序，旨在从 Office 文档（特别支持 `.docx`、`.xlsx`、`.xlsm` 和 `.pptx` 格式）中提取内容。该工具采用 Tkinter 构建用户界面，并利用专业的 Python 库进行文档解析。
